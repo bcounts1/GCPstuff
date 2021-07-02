@@ -9,17 +9,19 @@ provider "google" {
     zone    = var.zone
 }
 
+
 resource "google_service_account" "default" {
   account_id   = var.service_account_id
   display_name = var.service_account_name
 }
 
+#compute instance with web tag to enable firewall rule association
 resource "google_compute_instance" "default" {
   name         = "testvm1"
   machine_type = "e2-medium"
   zone         = var.zone
 
-  tags = ["foo", "bar"]
+  tags = ["web"]
 
   boot_disk {
     initialize_params {
@@ -40,4 +42,23 @@ resource "google_compute_instance" "default" {
     email  = google_service_account.default.email
     scopes = ["cloud-platform"]
   }
+
+  metadata_startup_script = "sudo apt update && sudo apt -y install apache2 && echo '<!doctype html><html><body><h1>Hello World!</h1></body></html>' | sudo tee /var/www/html/index.html"
+}
+
+resource "google_compute_firewall" "web" {
+  name    = "allow-http"
+  network = "default"
+  direction = "INGRESS"
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "8080", "1000-2000"]
+  }
+
+  target_tags = ["web"]
+}
+
+#public IP address for compute instance
+output "public_ip_addr" {
+  value = google_compute_instance.default.network_interface.0.access_config.0.nat_ip
 }
