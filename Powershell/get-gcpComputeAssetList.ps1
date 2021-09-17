@@ -15,8 +15,6 @@ param (
     $orgid,
     $resource
 )
-$Projects = gcloud projects list --format="json"
-$ProjectList = $Projects | ConvertFrom-Json
 
 $resources = gcloud asset list --organization $orgid --filter=assetType:compute.googleapis.com/$resource --format="json" 
 $resourceList = $resources | ConvertFrom-Json
