@@ -14,3 +14,5 @@ if ($subnetstring.Substring($spos+12) -match $subnetname){
     set-gceinstance -Name $instance.Name -Zone $zone -AddTag $tagname
 }
 }
+
+# Example: ./apply-subnetTags.ps1 -subnetname mysubnet -tagname mysubnetservers
